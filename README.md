@@ -67,6 +67,15 @@ Data lives at:
 ~/Library/Application Support/nano-reminder/tasks.json
 ```
 
+## Roadmap
+
+- Adaptive bubble window sizing for different message lengths.
+- More avatar expressions to represent different agent states.
+- Markdown-style `**keywords**` rendered with colorful RGB emphasis.
+- Optional choice prompts such as yes/no/custom answers, enabling an ask-style flow.
+- Optional window shake animation for moments when the agent is especially excited.
+- A way to proactively open an input command window, backed by command-line calls to Claude Code CLI.
+
 ## License
 
 MIT
