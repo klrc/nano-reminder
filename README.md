@@ -96,7 +96,6 @@ Data lives at:
 - [x] Markdown-style `**keywords**` rendered with colorful RGB emphasis.
 - [x] Optional choice prompts such as yes/no/custom answers, enabling an ask-style flow.
 - [x] Optional window shake animation for moments when the agent is especially excited.
-- A way to proactively open an input command window, backed by command-line calls to Claude Code CLI.
 
 ## License
 
