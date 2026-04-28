@@ -7,6 +7,7 @@ HOOKS_DIR="$CLAUDE_DIR/hooks"
 SETTINGS="$CLAUDE_DIR/settings.json"
 GLOBAL_CLAUDE="$CLAUDE_DIR/CLAUDE.md"
 HOOK="$HOOKS_DIR/nano-reminder-stop.sh"
+ASK_HOOK="$HOOKS_DIR/nano-reminder-ask-hook.sh"
 
 mkdir -p "$HOOKS_DIR"
 
@@ -124,25 +125,38 @@ PY
 HOOK
 
 chmod +x "$HOOK"
+cp "$REPO_DIR/bin/nano-reminder-ask-hook.sh" "$ASK_HOOK"
+chmod +x "$ASK_HOOK"
 
-python3 - "$SETTINGS" "$HOOK" <<'PY'
+python3 - "$SETTINGS" "$HOOK" "$ASK_HOOK" <<'PY'
 import json
 import pathlib
 import sys
 
 settings_path = pathlib.Path(sys.argv[1])
 hook = sys.argv[2]
+ask_hook = sys.argv[3]
 data = {}
 if settings_path.exists():
     data = json.loads(settings_path.read_text())
 
-stop_hooks = data.setdefault("hooks", {}).setdefault("Stop", [])
-entry = {"hooks": [{"type": "command", "command": hook}]}
-stop_hooks[:] = [
-    item for item in stop_hooks
-    if not any(h.get("command") == hook for h in item.get("hooks", []))
-]
-stop_hooks.append(entry)
+hooks = data.setdefault("hooks", {})
+
+def install(event, command, matcher=None):
+    event_hooks = hooks.setdefault(event, [])
+    event_hooks[:] = [
+        item for item in event_hooks
+        if not any(h.get("command") == command for h in item.get("hooks", []))
+    ]
+    entry = {"hooks": [{"type": "command", "command": command}]}
+    if matcher:
+        entry["matcher"] = matcher
+    event_hooks.append(entry)
+
+install("Stop", hook)
+install("PreToolUse", ask_hook, "AskUserQuestion")
+install("PermissionRequest", ask_hook)
+install("Notification", ask_hook, "permission_prompt")
 settings_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
 PY
 
@@ -157,7 +171,7 @@ text = path.read_text() if path.exists() else ""
 block = """<!-- nano-reminder:start -->
 Nano Reminder mirrors each final reply via the user Stop hook. End every final reply with one hidden mood marker: `<!-- nano-mood:happy -->`.
 
-Pick expressive moods boldly; avoid `calm` unless the reply is a dry factual status. Use `happy` for greeting/success/playful banter, `grateful` for thanks/acknowledgement, `confused` for ambiguity/teasing/“are you kidding?”, `panic` for urgent/overloaded, `shocked` for failure/surprise/being startled or roasted. Do not manually notify at every turn; only use `mcp__nano-reminder__notify_now` for explicit custom/immediate reminders.
+Pick expressive moods boldly; avoid `calm` unless the reply is a dry factual status. Use `happy` for greeting/success/playful banter, `grateful` for thanks/acknowledgement, `confused` for ambiguity/teasing/“are you kidding?”, `ask` for explicit user choice/permission, `panic` for urgent/overloaded, `shocked` for failure/surprise/being startled or roasted. Do not manually notify at every turn; only use `mcp__nano-reminder__notify_now` for explicit custom/immediate reminders.
 <!-- nano-reminder:end -->"""
 pattern = r"<!-- nano-reminder:start -->.*?<!-- nano-reminder:end -->"
 if re.search(pattern, text, flags=re.S):
@@ -168,3 +182,4 @@ path.write_text(text)
 PY
 
 echo "Claude Stop hook installed: $HOOK"
+echo "Claude ask hook installed: $ASK_HOOK"

@@ -54,7 +54,7 @@ const tools = [
         },
         mood: {
           type: "string",
-          enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
+          enum: ["calm", "happy", "grateful", "confused", "ask", "panic", "shocked"],
           description: "Optional Nano expression avatar mood.",
         },
         choices: {
@@ -87,7 +87,7 @@ const tools = [
         },
         mood: {
           type: "string",
-          enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
+          enum: ["calm", "happy", "grateful", "confused", "ask", "panic", "shocked"],
           description: "Optional Nano expression avatar mood.",
         },
         choices: {

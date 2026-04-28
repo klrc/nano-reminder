@@ -5,6 +5,7 @@ enum ReminderMood: String, CaseIterable {
     case happy
     case grateful
     case confused
+    case ask
     case panic
     case shocked
 
@@ -20,6 +21,8 @@ enum ReminderMood: String, CaseIterable {
             "nano-mood-grateful"
         case .confused:
             "nano-mood-confused"
+        case .ask:
+            "nano-mood-ask"
         case .panic:
             "nano-mood-panic"
         case .shocked:
