@@ -37,7 +37,7 @@ enum ReminderLayout {
 
         let textBounds = ReminderMarkdown.measuredSize(for: displayText(from: text), width: textWidth)
         let bubbleVerticalPadding: CGFloat = 24
-        let choiceHeight: CGFloat = choices.isEmpty ? 0 : 42
+        let choiceHeight = estimatedChoiceHeight(for: choices, textWidth: textWidth)
         let chromeHeight = verticalPadding * 2 + bubbleVerticalPadding + 20 + choiceHeight
         let maxHeight = max(minWindowHeight, visibleFrame.height - 48)
         let width = min(maxWindowWidth, max(minWindowWidth, ceil(textWidth + horizontalChromeWidth)))
@@ -69,5 +69,34 @@ enum ReminderLayout {
 
     private static func displayText(from text: String) -> String {
         ReminderText.content(from: text).displayText
+    }
+
+    private static func estimatedChoiceHeight(for choices: [String], textWidth: CGFloat) -> CGFloat {
+        guard !choices.isEmpty else { return 0 }
+        let rowHeight: CGFloat = 32
+        let rowSpacing: CGFloat = 8
+        var rows = 1
+        var currentWidth: CGFloat = 0
+
+        for choice in choices {
+            let width = min(max(choiceWidth(for: choice), 54), textWidth)
+            let nextWidth = currentWidth == 0 ? width : currentWidth + 8 + width
+            if currentWidth > 0, nextWidth > textWidth {
+                rows += 1
+                currentWidth = width
+            } else {
+                currentWidth = nextWidth
+            }
+        }
+
+        return CGFloat(rows) * rowHeight + CGFloat(rows - 1) * rowSpacing
+    }
+
+    private static func choiceWidth(for choice: String) -> CGFloat {
+        (choice as NSString).boundingRect(
+            with: NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
+            options: [.usesLineFragmentOrigin, .usesFontLeading],
+            attributes: [.font: NSFont.systemFont(ofSize: 13, weight: .bold)]
+        ).width + 28
     }
 }

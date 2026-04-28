@@ -92,7 +92,7 @@ private struct ChoiceButtons: View {
 
     var body: some View {
         if !choices.isEmpty {
-            HStack(spacing: 8) {
+            FlowLayout(spacing: 8, rowSpacing: 8) {
                 ForEach(choices, id: \.self) { choice in
                     Button {
                         onChoose(choice)
@@ -101,7 +101,8 @@ private struct ChoiceButtons: View {
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundColor(.black)
                             .lineLimit(1)
-                            .padding(.horizontal, 12)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.horizontal, 14)
                             .padding(.vertical, 7)
                             .background(
                                 Capsule()
@@ -112,6 +113,69 @@ private struct ChoiceButtons: View {
                 }
             }
         }
+    }
+}
+
+private struct FlowLayout: Layout {
+    let spacing: CGFloat
+    let rowSpacing: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .greatestFiniteMagnitude
+        let rows = rows(for: subviews, maxWidth: maxWidth)
+        return CGSize(
+            width: rows.map(\.width).max() ?? 0,
+            height: rows.reduce(0) { $0 + $1.height } + CGFloat(max(0, rows.count - 1)) * rowSpacing
+        )
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var y = bounds.minY
+
+        for row in rows(for: subviews, maxWidth: bounds.width) {
+            var x = bounds.minX
+            for item in row.items {
+                subviews[item.index].place(
+                    at: CGPoint(x: x, y: y),
+                    proposal: ProposedViewSize(item.size)
+                )
+                x += item.size.width + spacing
+            }
+            y += row.height + rowSpacing
+        }
+    }
+
+    private func rows(for subviews: Subviews, maxWidth: CGFloat) -> [FlowRow] {
+        var rows: [FlowRow] = []
+        var current = FlowRow()
+
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let nextWidth = current.items.isEmpty ? size.width : current.width + spacing + size.width
+            if !current.items.isEmpty, nextWidth > maxWidth {
+                rows.append(current)
+                current = FlowRow()
+            }
+            current.items.append(FlowItem(index: index, size: size))
+            current.width = current.items.count == 1 ? size.width : current.width + spacing + size.width
+            current.height = max(current.height, size.height)
+        }
+
+        if !current.items.isEmpty {
+            rows.append(current)
+        }
+        return rows
+    }
+
+    private struct FlowItem {
+        let index: Int
+        let size: CGSize
+    }
+
+    private struct FlowRow {
+        var items: [FlowItem] = []
+        var width: CGFloat = 0
+        var height: CGFloat = 0
     }
 }
 
