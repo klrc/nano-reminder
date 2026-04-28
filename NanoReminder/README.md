@@ -28,6 +28,8 @@ bin/nano-reminder show --text "**构建完成**，可以回来啦" --mood happy
 bin/nano-reminder show --text "马上回来处理这个失败" --shake --mood panic
 ```
 
+支持表情：`calm` / `happy` / `grateful` / `confused` / `panic` / `shocked`。
+
 ### 添加定时提醒
 
 ```bash
@@ -62,11 +64,21 @@ bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 你帮我检查一下构建是否通过，最后通知我。
 ```
 
+也可以安装用户级 Stop hook，让所有 Claude Code 对话结束时自动把最终回复镜像成 Nano 弹窗，不依赖 MCP：
+
+```bash
+bin/install-claude-hook.sh
+bin/uninstall-claude-hook.sh
+```
+
+hook 会读取最终回复末尾的 `<!-- nano-mood:happy -->` 这类隐藏标记选择表情，并在已经发过 Nano 通知时跳过，避免重复弹窗。
+
 ## CLI
 
 ```bash
 nano-reminder show --text "现在喝水"
-nano-reminder show --text "**构建完成**，可以回来啦" --shake
+nano-reminder show --text "**构建完成**，可以回来啦" --mood happy
+nano-reminder show --text "马上回来处理这个失败" --shake --mood panic
 nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 nano-reminder list
 nano-reminder delete <id>

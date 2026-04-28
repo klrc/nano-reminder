@@ -21,6 +21,13 @@ swift build --package-path NanoReminder
 ./bin/nano-reminder show --text "Hello from Nano Reminder"
 ```
 
+Install the app bundle and optional Claude Code hook:
+
+```bash
+bin/rebuild-app.sh
+bin/install-claude-hook.sh
+```
+
 Start the resident scheduler:
 
 ```bash
@@ -50,6 +57,15 @@ Example prompt:
 ```
 
 Claude should finish the task and call `notify_now`.
+
+For all Claude Code conversations, the optional user-level Stop hook mirrors each final reply into a local Nano popup without depending on MCP:
+
+```bash
+bin/install-claude-hook.sh
+bin/uninstall-claude-hook.sh
+```
+
+Final replies can end with a hidden mood marker such as `<!-- nano-mood:happy -->`. Supported moods are `calm`, `happy`, `grateful`, `confused`, `panic`, and `shocked`. The hook removes the marker from the popup text and skips itself if the turn already sent a Nano notification.
 
 ## CLI
 
