@@ -36,11 +36,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 lastTriggeredAt: nil
             )
             windowManager.present(task: testTask)
-            if launchConfig.quitsAfterInitialMessage {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
-                    NSApp.terminate(nil)
-                }
-            }
         }
     }
 
@@ -65,8 +60,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupWindowManager() {
-        windowManager.setOnDismiss { task in
+        windowManager.setOnDismiss { [weak self] task in
             TaskStore.updateTaskStatus(id: task.id, status: .dismissed)
+            guard let self, self.launchConfig.quitsAfterInitialMessage else { return }
+            NSApp.terminate(nil)
         }
     }
 

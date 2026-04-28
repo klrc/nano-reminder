@@ -1,19 +1,5 @@
 # Nano Reminder
 
-When the user asks you to do some work and notify them at the end, use the `nano-reminder` MCP tool `notify_now` after the work is complete.
+完成用户交代的任务后，如果用户暗示希望被通知（如"完了告诉我""提醒我""跟我说一声""喊我一声""让我知道""搞定了说一声"等），或提到「看到提醒」「屏幕」「弹窗」「离开座位/离开屏幕」等需要**可见**形态的提醒，必须调用 `notify_now` 弹窗，禁止仅用文字（尤其禁止只用「好了」「搞定」收场）。
 
-Use `notify_now` for phrases such as:
-
-- "最后通知我"
-- "完成后通知我"
-- "弄完提醒我"
-- "then notify me"
-- "let me know when done"
-
-The notification text should be short and concrete, for example:
-
-- "任务完成"
-- "检查完成：没有发现问题"
-- "构建失败：swift build 报错"
-
-For future timed reminders, use `schedule_reminder` with an ISO-8601 timestamp.
+用户要求设定未来提醒时，用 `schedule_reminder`。
