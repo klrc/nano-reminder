@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "nano-reminder": {
+      "command": "node",
+      "args": [
+        "tools/nano-reminder-mcp.js"
+      ]
+    }
+  }
+}

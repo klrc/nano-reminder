@@ -1,0 +1,12 @@
+#!/bin/zsh
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+APP_DIR="$(cd "$SCRIPT_DIR/../NanoReminder" && pwd)"
+APP_BIN="$APP_DIR/.build/debug/NanoReminder"
+
+if [[ ! -x "$APP_BIN" ]]; then
+  (cd "$APP_DIR" && swift build >/dev/null)
+fi
+
+exec "$APP_BIN" "$@"
