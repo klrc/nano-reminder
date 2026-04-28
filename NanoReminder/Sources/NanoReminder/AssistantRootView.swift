@@ -11,7 +11,13 @@ struct AssistantRootView: View {
                 .offset(x: viewModel.isPresented ? 0 : -28, y: viewModel.isFloating ? -4 : 4)
                 .opacity(viewModel.isPresented ? 1 : 0)
 
-            ReminderBubble(text: viewModel.reminderText, textWidth: textWidth, textHeight: textHeight)
+            ReminderBubble(
+                text: viewModel.reminderText,
+                choices: viewModel.choices,
+                textWidth: textWidth,
+                textHeight: textHeight,
+                onChoose: viewModel.choose
+            )
                 .offset(x: viewModel.isPresented ? 0 : -20, y: viewModel.isFloating ? -6 : 2)
                 .opacity(viewModel.isPresented ? 1 : 0)
 
@@ -50,8 +56,10 @@ private struct AvatarView: View {
 
 private struct ReminderBubble: View {
     let text: String
+    let choices: [String]
     let textWidth: CGFloat
     let textHeight: CGFloat
+    let onChoose: (String) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -60,16 +68,50 @@ private struct ReminderBubble: View {
                 .frame(width: 10, height: 18)
                 .offset(x: 2, y: 18)
 
-            MarkdownTextView(markdown: text, width: textWidth)
-                .frame(width: textWidth, height: textHeight, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(Color.black.opacity(0.94))
-                )
+            VStack(alignment: .leading, spacing: 10) {
+                MarkdownTextView(markdown: text, width: textWidth)
+                    .frame(width: textWidth, height: textHeight, alignment: .leading)
+
+                ChoiceButtons(choices: choices, onChoose: onChoose)
+                    .frame(width: textWidth, alignment: .leading)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.black.opacity(0.94))
+            )
         }
         .shadow(color: .black.opacity(0.18), radius: 18, y: 10)
+    }
+}
+
+private struct ChoiceButtons: View {
+    let choices: [String]
+    let onChoose: (String) -> Void
+
+    var body: some View {
+        if !choices.isEmpty {
+            HStack(spacing: 8) {
+                ForEach(choices, id: \.self) { choice in
+                    Button {
+                        onChoose(choice)
+                    } label: {
+                        Text(choice)
+                            .font(.system(size: 13, weight: .bold, design: .rounded))
+                            .foregroundColor(.black)
+                            .lineLimit(1)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 7)
+                            .background(
+                                Capsule()
+                                    .fill(Color.white.opacity(0.92))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
     }
 }
 

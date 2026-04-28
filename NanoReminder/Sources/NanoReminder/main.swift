@@ -4,6 +4,7 @@ import SwiftUI
 struct LaunchConfig {
     let isResident: Bool
     let initialMessage: String?
+    let initialChoices: [String]
     let quitsAfterInitialMessage: Bool
 }
 
@@ -15,6 +16,13 @@ func argumentValue(named name: String) -> String? {
     return args[index + 1]
 }
 
+func choicesValue(from args: [String]) -> [String] {
+    guard let raw = argumentValue(named: "--choices") else { return [] }
+    return raw.split(separator: ",")
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+}
+
 func positionalMessage(from args: [String], droppingFirst: Bool = false) -> String? {
     let values = droppingFirst ? Array(args.dropFirst()) : args
     var messageParts: [String] = []
@@ -22,7 +30,7 @@ func positionalMessage(from args: [String], droppingFirst: Bool = false) -> Stri
 
     while i < values.count {
         switch values[i] {
-        case "--text", "--message", "--mood":
+        case "--text", "--message", "--mood", "--choices":
             i += 2
         case "--shake", "--resident":
             i += 1
@@ -79,6 +87,7 @@ if args.first == "show" {
 let initialMessage = showText
     ?? argumentValue(named: "--message")
     ?? positionalMessage(from: args)
+let initialChoices = choicesValue(from: args)
 
 let explicitMood: ReminderMood?
 if let moodValue = argumentValue(named: "--mood") {
@@ -95,6 +104,7 @@ if let moodValue = argumentValue(named: "--mood") {
 let launchConfig = LaunchConfig(
     isResident: args.contains("--resident") || args.isEmpty,
     initialMessage: initialMessage.map { ReminderText.encode($0, shake: shouldShakeInitialMessage, mood: explicitMood) },
+    initialChoices: initialChoices,
     quitsAfterInitialMessage: showText != nil
 )
 

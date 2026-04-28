@@ -24,7 +24,7 @@ enum ReminderLayout {
     static let maxWindowWidth: CGFloat = 920
     static let minWindowHeight: CGFloat = 128
 
-    static func metrics(for text: String, visibleFrame: NSRect) -> ReminderWindowMetrics {
+    static func metrics(for text: String, choices: [String] = [], visibleFrame: NSRect) -> ReminderWindowMetrics {
         let availableWindowWidth = max(minWindowWidth, min(maxWindowWidth, visibleFrame.width - 36))
         let availableTextWidth = max(
             minTextWidth,
@@ -37,7 +37,8 @@ enum ReminderLayout {
 
         let textBounds = ReminderMarkdown.measuredSize(for: displayText(from: text), width: textWidth)
         let bubbleVerticalPadding: CGFloat = 24
-        let chromeHeight = verticalPadding * 2 + bubbleVerticalPadding + 20
+        let choiceHeight: CGFloat = choices.isEmpty ? 0 : 42
+        let chromeHeight = verticalPadding * 2 + bubbleVerticalPadding + 20 + choiceHeight
         let maxHeight = max(minWindowHeight, visibleFrame.height - 48)
         let width = min(maxWindowWidth, max(minWindowWidth, ceil(textWidth + horizontalChromeWidth)))
         let height = min(max(minWindowHeight, ceil(textBounds.height) + chromeHeight), maxHeight)

@@ -10,6 +10,8 @@ enum TaskStatus: String, Codable {
 struct TaskItem: Codable, Identifiable, Hashable {
     let id: String
     let text: String
+    var choices: [String]?
+    var response: String?
     let createdAt: String
     var dueAt: String
     var status: TaskStatus

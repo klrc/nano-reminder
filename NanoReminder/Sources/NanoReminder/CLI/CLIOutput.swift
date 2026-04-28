@@ -10,8 +10,8 @@ enum CLIOutput {
         Nano Reminder - macOS reminder shell
 
         用法:
-          nano-reminder add --at <ISO-8601 时间> --text <内容> [--shake] [--mood \(ReminderMood.usageList)]
-          nano-reminder show --text <内容> [--shake] [--mood \(ReminderMood.usageList)]
+          nano-reminder add --at <ISO-8601 时间> --text <内容> [--shake] [--mood \(ReminderMood.usageList)] [--choices 是,否]
+          nano-reminder show --text <内容> [--shake] [--mood \(ReminderMood.usageList)] [--choices 是,否]
           nano-reminder list
           nano-reminder delete <id>
           nano-reminder clean

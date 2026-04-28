@@ -1,7 +1,7 @@
 import Foundation
 
 enum CLICommand {
-    case add(dueAt: String, text: String, shake: Bool, mood: ReminderMood?)
+    case add(dueAt: String, text: String, shake: Bool, mood: ReminderMood?, choices: [String])
     case list
     case delete(id: String)
     case clean
@@ -33,6 +33,7 @@ enum CLICommand {
         var text: String?
         var shake = false
         var mood: ReminderMood?
+        var choices: [String] = []
 
         var i = 0
         while i < arguments.count {
@@ -60,6 +61,15 @@ enum CLICommand {
                     throw CLIError.badValue("--mood 必须是: \(ReminderMood.usageList)")
                 }
                 mood = parsedMood
+            case "--choices":
+                guard i + 1 < arguments.count else {
+                    throw CLIError.missingValue("--choices 需要逗号分隔选项")
+                }
+                i += 1
+                choices = arguments[i]
+                    .split(separator: ",")
+                    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                    .filter { !$0.isEmpty }
             default:
                 throw CLIError.unknownFlag(arguments[i])
             }
@@ -76,13 +86,13 @@ enum CLICommand {
             throw CLIError.missingValue("--text 是必填参数")
         }
 
-        return .add(dueAt: dueAt, text: text, shake: shake, mood: mood)
+        return .add(dueAt: dueAt, text: text, shake: shake, mood: mood, choices: choices)
     }
 
     func execute() throws -> String {
         switch self {
-        case .add(let dueAt, let text, let shake, let mood):
-            return executeAdd(dueAt: dueAt, text: text, shake: shake, mood: mood)
+        case .add(let dueAt, let text, let shake, let mood, let choices):
+            return executeAdd(dueAt: dueAt, text: text, shake: shake, mood: mood, choices: choices)
         case .list:
             return executeList()
         case .delete(let id):
@@ -92,7 +102,7 @@ enum CLICommand {
         }
     }
 
-    private func executeAdd(dueAt: String, text: String, shake: Bool, mood: ReminderMood?) -> String {
+    private func executeAdd(dueAt: String, text: String, shake: Bool, mood: ReminderMood?, choices: [String]) -> String {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         let storedText = ReminderText.encode(text, shake: shake, mood: mood)
@@ -100,6 +110,8 @@ enum CLICommand {
         let task = TaskItem(
             id: UUID().uuidString,
             text: storedText,
+            choices: choices.isEmpty ? nil : choices,
+            response: nil,
             createdAt: formatter.string(from: Date()),
             dueAt: dueAt,
             status: .pending,

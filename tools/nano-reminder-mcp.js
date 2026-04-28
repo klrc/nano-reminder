@@ -57,6 +57,11 @@ const tools = [
           enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
           description: "Optional Nano expression avatar mood.",
         },
+        choices: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional choice buttons to show below the message.",
+        },
       },
       required: ["text"],
       additionalProperties: false,
@@ -84,6 +89,11 @@ const tools = [
           type: "string",
           enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
           description: "Optional Nano expression avatar mood.",
+        },
+        choices: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional choice buttons to show below the message.",
         },
       },
       required: ["at", "text"],
@@ -117,12 +127,18 @@ async function handle(message) {
         const nanoArgs = ["show", "--text", String(args.text || "")];
         if (args.shake === true) nanoArgs.push("--shake");
         if (typeof args.mood === "string" && args.mood) nanoArgs.push("--mood", args.mood);
+        if (Array.isArray(args.choices) && args.choices.length > 0) {
+          nanoArgs.push("--choices", args.choices.map(String).filter(Boolean).join(","));
+        }
         const output = await runNano(nanoArgs);
         respond(id, { content: [{ type: "text", text: output || "Notification shown." }] });
       } else if (name === "schedule_reminder") {
         const nanoArgs = ["add", "--at", String(args.at || ""), "--text", String(args.text || "")];
         if (args.shake === true) nanoArgs.push("--shake");
         if (typeof args.mood === "string" && args.mood) nanoArgs.push("--mood", args.mood);
+        if (Array.isArray(args.choices) && args.choices.length > 0) {
+          nanoArgs.push("--choices", args.choices.map(String).filter(Boolean).join(","));
+        }
         const output = await runNano(nanoArgs);
         respond(id, { content: [{ type: "text", text: output }] });
       } else {

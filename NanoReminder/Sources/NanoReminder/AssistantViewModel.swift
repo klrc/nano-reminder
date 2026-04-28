@@ -4,17 +4,19 @@ import SwiftUI
 @MainActor
 final class AssistantViewModel: ObservableObject {
     @Published var reminderText = ""
+    @Published var choices: [String] = []
     @Published var mood: ReminderMood = .defaultMood
     @Published var isPresented = false
     @Published var isFloating = false
     @Published var shakePhase: CGFloat = 0
 
     var currentReminderID: String?
-    var onDismiss: ((String?) -> Void)?
+    var onDismiss: ((String?, String?) -> Void)?
 
-    func present(text: String, reminderID: String?) {
+    func present(text: String, choices: [String] = [], reminderID: String?) {
         let content = ReminderText.content(from: text)
         reminderText = content.displayText
+        self.choices = choices
         mood = content.mood
         currentReminderID = reminderID
         isFloating = false
@@ -41,6 +43,14 @@ final class AssistantViewModel: ObservableObject {
     }
 
     func dismiss() {
+        dismiss(choice: nil)
+    }
+
+    func choose(_ choice: String) {
+        dismiss(choice: choice)
+    }
+
+    private func dismiss(choice: String?) {
         let reminderID = currentReminderID
         withAnimation(.easeInOut(duration: 0.2)) {
             isPresented = false
@@ -50,7 +60,7 @@ final class AssistantViewModel: ObservableObject {
         currentReminderID = nil
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { [weak self] in
-            self?.onDismiss?(reminderID)
+            self?.onDismiss?(reminderID, choice)
         }
     }
 }

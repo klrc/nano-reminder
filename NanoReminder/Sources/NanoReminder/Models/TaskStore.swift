@@ -55,6 +55,13 @@ enum TaskStore {
         save(store)
     }
 
+    static func updateTaskResponse(id: String, response: String) {
+        var store = load()
+        guard let index = store.tasks.firstIndex(where: { $0.id == id }) else { return }
+        store.tasks[index].response = response
+        save(store)
+    }
+
     static func updateLastTriggered(id: String, at: Date) {
         var store = load()
         guard let index = store.tasks.firstIndex(where: { $0.id == id }) else { return }

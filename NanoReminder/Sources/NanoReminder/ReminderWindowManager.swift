@@ -6,21 +6,21 @@ final class ReminderWindowManager {
     private var windows: [String: AssistantWindow] = [:]
     private var viewModels: [String: AssistantViewModel] = [:]
     private var tasks: [String: TaskItem] = [:]
-    private var onDismiss: ((TaskItem) -> Void)?
+    private var onDismiss: ((TaskItem, String?) -> Void)?
 
-    func setOnDismiss(_ handler: @escaping (TaskItem) -> Void) {
+    func setOnDismiss(_ handler: @escaping (TaskItem, String?) -> Void) {
         onDismiss = handler
     }
 
     func present(task: TaskItem) {
         print("ReminderWindowManager present \(task.id) \(task.text)")
         let visibleFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
-        let metrics = ReminderLayout.metrics(for: task.text, visibleFrame: visibleFrame)
+        let metrics = ReminderLayout.metrics(for: task.text, choices: task.choices ?? [], visibleFrame: visibleFrame)
 
         let viewModel = AssistantViewModel()
-        viewModel.onDismiss = { [weak self] _ in
+        viewModel.onDismiss = { [weak self] _, choice in
             guard let self else { return }
-            self.onDismiss?(task)
+            self.onDismiss?(task, choice)
             self.dismiss(task: task)
         }
 
@@ -43,7 +43,7 @@ final class ReminderWindowManager {
         viewModels[taskID] = viewModel
         tasks[taskID] = task
 
-        viewModel.present(text: task.text, reminderID: task.id)
+        viewModel.present(text: task.text, choices: task.choices ?? [], reminderID: task.id)
     }
 
     func dismiss(task: TaskItem) {

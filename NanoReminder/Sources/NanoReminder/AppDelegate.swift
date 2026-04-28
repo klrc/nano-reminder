@@ -30,6 +30,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let testTask = TaskItem(
                 id: UUID().uuidString,
                 text: text,
+                choices: launchConfig.initialChoices,
+                response: nil,
                 createdAt: ISO8601DateFormatter().string(from: Date()),
                 dueAt: ISO8601DateFormatter().string(from: Date()),
                 status: .pending,
@@ -60,8 +62,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func setupWindowManager() {
-        windowManager.setOnDismiss { [weak self] task in
-            TaskStore.updateTaskStatus(id: task.id, status: .dismissed)
+        windowManager.setOnDismiss { [weak self] task, choice in
+            if let choice {
+                TaskStore.updateTaskResponse(id: task.id, response: choice)
+                TaskStore.updateTaskStatus(id: task.id, status: .completed)
+                print("NanoReminder choice: \(choice)")
+            } else {
+                TaskStore.updateTaskStatus(id: task.id, status: .dismissed)
+            }
             guard let self, self.launchConfig.quitsAfterInitialMessage else { return }
             NSApp.terminate(nil)
         }
@@ -72,6 +80,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let testTask = TaskItem(
             id: UUID().uuidString,
             text: "记得下班打卡",
+            choices: ["好了", "稍后"],
+            response: nil,
             createdAt: ISO8601DateFormatter().string(from: Date()),
             dueAt: ISO8601DateFormatter().string(from: Date()),
             status: .pending,
