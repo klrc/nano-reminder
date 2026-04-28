@@ -3,6 +3,7 @@ import SwiftUI
 struct AssistantRootView: View {
     @ObservedObject var viewModel: AssistantViewModel
     let textWidth: CGFloat
+    let textHeight: CGFloat
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 12) {
@@ -10,7 +11,7 @@ struct AssistantRootView: View {
                 .offset(x: viewModel.isPresented ? 0 : -28, y: viewModel.isFloating ? -4 : 4)
                 .opacity(viewModel.isPresented ? 1 : 0)
 
-            ReminderBubble(text: viewModel.reminderText, textWidth: textWidth)
+            ReminderBubble(text: viewModel.reminderText, textWidth: textWidth, textHeight: textHeight)
                 .offset(x: viewModel.isPresented ? 0 : -20, y: viewModel.isFloating ? -6 : 2)
                 .opacity(viewModel.isPresented ? 1 : 0)
 
@@ -50,6 +51,7 @@ private struct AvatarView: View {
 private struct ReminderBubble: View {
     let text: String
     let textWidth: CGFloat
+    let textHeight: CGFloat
     
     var body: some View {
         HStack(spacing: 0) {
@@ -58,11 +60,8 @@ private struct ReminderBubble: View {
                 .frame(width: 10, height: 18)
                 .offset(x: 2, y: 18)
 
-            highlightedText
-                .font(.system(size: 15, weight: .semibold, design: .rounded))
-                .lineLimit(nil)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(width: textWidth, alignment: .leading)
+            MarkdownTextView(markdown: text, width: textWidth)
+                .frame(width: textWidth, height: textHeight, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .background(
@@ -71,46 +70,6 @@ private struct ReminderBubble: View {
                 )
         }
         .shadow(color: .black.opacity(0.18), radius: 18, y: 10)
-    }
-
-    private var highlightedText: Text {
-        var result = Text("")
-        var remainder = text[...]
-        var highlightIndex = 0
-
-        while let start = remainder.range(of: "**") {
-            result = result + plainText(String(remainder[..<start.lowerBound]))
-            let afterStart = remainder[start.upperBound...]
-            guard let end = afterStart.range(of: "**") else {
-                result = result + plainText(String(remainder[start.lowerBound...]))
-                return result
-            }
-
-            let emphasized = String(afterStart[..<end.lowerBound])
-            if emphasized.isEmpty {
-                result = result + plainText("****")
-            } else {
-                result = result + Text(emphasized).foregroundColor(highlightColor(at: highlightIndex))
-                highlightIndex += 1
-            }
-            remainder = afterStart[end.upperBound...]
-        }
-
-        return result + plainText(String(remainder))
-    }
-
-    private func plainText(_ value: String) -> Text {
-        Text(value).foregroundColor(.white)
-    }
-
-    private func highlightColor(at index: Int) -> Color {
-        let colors = [
-            Color(red: 1.0, green: 0.43, blue: 0.62),
-            Color(red: 0.38, green: 0.78, blue: 1.0),
-            Color(red: 0.74, green: 1.0, blue: 0.42),
-            Color(red: 1.0, green: 0.78, blue: 0.28),
-        ]
-        return colors[index % colors.count]
     }
 }
 

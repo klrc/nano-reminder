@@ -7,6 +7,7 @@ A tiny macOS reminder shell for AI agents. It gives Claude Code and other local 
 ## What It Does
 
 - Shows an immediate floating reminder window.
+- Renders Markdown-ish inline text (`**strong**`, `*emphasis*`, and `` `code` ``) in an adaptive bubble.
 - Stores one-time scheduled reminders.
 - Runs as a menu-bar resident app.
 - Exposes a local MCP server so Claude Code can call `notify_now`.
@@ -72,6 +73,7 @@ Final replies can end with a hidden mood marker such as `<!-- nano-mood:happy --
 ```bash
 bin/nano-reminder show --text "现在喝水"
 bin/nano-reminder show --text "**构建完成**，可以回来啦" --mood happy
+bin/nano-reminder show --text "支持 `code`、*强调* 和 **重点**" --mood happy
 bin/nano-reminder show --text "马上回来处理这个失败" --shake --mood panic
 bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 bin/nano-reminder list

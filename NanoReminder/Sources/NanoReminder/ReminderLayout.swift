@@ -3,6 +3,7 @@ import AppKit
 struct ReminderWindowMetrics {
     let windowSize: NSSize
     let textWidth: CGFloat
+    let textHeight: CGFloat
 }
 
 @MainActor
@@ -17,15 +18,11 @@ enum ReminderLayout {
     static let verticalPadding: CGFloat = 14
     static let bubbleTailWidth: CGFloat = 10
     static let bubbleHorizontalPadding: CGFloat = 16
-    static let minTextWidth: CGFloat = 150
-    static let maxTextWidth: CGFloat = 510
+    static let minTextWidth: CGFloat = 190
+    static let maxTextWidth: CGFloat = 760
     static let minWindowWidth: CGFloat = 320
-    static let maxWindowWidth: CGFloat = 660
+    static let maxWindowWidth: CGFloat = 920
     static let minWindowHeight: CGFloat = 128
-
-    private static var textFont: NSFont {
-        NSFont.systemFont(ofSize: 15, weight: .semibold)
-    }
 
     static func metrics(for text: String, visibleFrame: NSRect) -> ReminderWindowMetrics {
         let availableWindowWidth = max(minWindowWidth, min(maxWindowWidth, visibleFrame.width - 36))
@@ -38,19 +35,17 @@ enum ReminderLayout {
             min(maxTextWidth, availableTextWidth)
         )
 
-        let textBounds = (displayText(from: text) as NSString).boundingRect(
-            with: NSSize(width: textWidth, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: [.font: textFont]
-        )
-        let chromeHeight = verticalPadding * 2 + 64
-        let maxHeight = max(minWindowHeight, visibleFrame.height - 80)
+        let textBounds = ReminderMarkdown.measuredSize(for: displayText(from: text), width: textWidth)
+        let bubbleVerticalPadding: CGFloat = 24
+        let chromeHeight = verticalPadding * 2 + bubbleVerticalPadding + 20
+        let maxHeight = max(minWindowHeight, visibleFrame.height - 48)
         let width = min(maxWindowWidth, max(minWindowWidth, ceil(textWidth + horizontalChromeWidth)))
         let height = min(max(minWindowHeight, ceil(textBounds.height) + chromeHeight), maxHeight)
 
         return ReminderWindowMetrics(
             windowSize: NSSize(width: width, height: height),
-            textWidth: textWidth
+            textWidth: textWidth,
+            textHeight: textBounds.height
         )
     }
 
@@ -64,14 +59,14 @@ enum ReminderLayout {
     }
 
     private static func singleLineTextWidth(for text: String) -> CGFloat {
-        (text as NSString).boundingRect(
+        ReminderMarkdown.nsAttributedString(from: text).boundingRect(
             with: NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
             options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: [.font: textFont]
+            context: nil
         ).width
     }
 
     private static func displayText(from text: String) -> String {
-        ReminderText.plainDisplayText(from: text)
+        ReminderText.content(from: text).displayText
     }
 }

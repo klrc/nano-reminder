@@ -24,7 +24,7 @@ final class ReminderWindowManager {
             self.dismiss(task: task)
         }
 
-        let rootView = AssistantRootView(viewModel: viewModel, textWidth: metrics.textWidth)
+        let rootView = AssistantRootView(viewModel: viewModel, textWidth: metrics.textWidth, textHeight: metrics.textHeight)
         let hostingView = NSHostingView(rootView: rootView.frame(width: metrics.windowSize.width, height: metrics.windowSize.height))
 
         let idx = windows.count

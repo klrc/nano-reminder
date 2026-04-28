@@ -89,7 +89,8 @@ def text_from_last_message(value):
     text = re.sub(r"\[nano-mood:(?:calm|happy|grateful|confused|panic|shocked)\]", "", value)
     text = re.sub(r"<!--\s*nano-mood:(?:calm|happy|grateful|confused|panic|shocked)\s*-->", "", text)
     text = re.sub(r"```.*?```", "[代码片段]", text, flags=re.S)
-    text = re.sub(r"\s+", " ", text).strip().replace("**", "")
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    text = "\n".join(line.rstrip() for line in text.splitlines()).strip()
     if len(text) > MAX_TEXT_CHARS:
         text = text[:MAX_TEXT_CHARS].rstrip() + "..."
     return text, marker_mood

@@ -56,8 +56,6 @@ enum ReminderText {
     }
 
     static func plainDisplayText(from rawText: String) -> String {
-        content(from: rawText)
-            .displayText
-            .replacingOccurrences(of: "**", with: "")
+        ReminderMarkdown.plainText(from: content(from: rawText).displayText)
     }
 }
