@@ -48,6 +48,15 @@ const tools = [
           type: "string",
           description: "The reminder text to show in the popup window.",
         },
+        shake: {
+          type: "boolean",
+          description: "Set true to briefly shake the popup for extra emphasis.",
+        },
+        mood: {
+          type: "string",
+          enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
+          description: "Optional Nano expression avatar mood.",
+        },
       },
       required: ["text"],
       additionalProperties: false,
@@ -66,6 +75,15 @@ const tools = [
         text: {
           type: "string",
           description: "The reminder text to show when the reminder is due.",
+        },
+        shake: {
+          type: "boolean",
+          description: "Set true to briefly shake the popup when the reminder appears.",
+        },
+        mood: {
+          type: "string",
+          enum: ["calm", "happy", "grateful", "confused", "panic", "shocked"],
+          description: "Optional Nano expression avatar mood.",
         },
       },
       required: ["at", "text"],
@@ -96,10 +114,16 @@ async function handle(message) {
       const name = params?.name;
       const args = params?.arguments || {};
       if (name === "notify_now") {
-        const output = await runNano(["show", "--text", String(args.text || "")]);
+        const nanoArgs = ["show", "--text", String(args.text || "")];
+        if (args.shake === true) nanoArgs.push("--shake");
+        if (typeof args.mood === "string" && args.mood) nanoArgs.push("--mood", args.mood);
+        const output = await runNano(nanoArgs);
         respond(id, { content: [{ type: "text", text: output || "Notification shown." }] });
       } else if (name === "schedule_reminder") {
-        const output = await runNano(["add", "--at", String(args.at || ""), "--text", String(args.text || "")]);
+        const nanoArgs = ["add", "--at", String(args.at || ""), "--text", String(args.text || "")];
+        if (args.shake === true) nanoArgs.push("--shake");
+        if (typeof args.mood === "string" && args.mood) nanoArgs.push("--mood", args.mood);
+        const output = await runNano(nanoArgs);
         respond(id, { content: [{ type: "text", text: output }] });
       } else {
         reject(id, -32601, `Unknown tool: ${name}`);

@@ -20,7 +20,7 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 echo "4. Copying binary and resources..."
 cp "$BUILD_DIR/NanoReminder" "$APP_BUNDLE/Contents/MacOS/"
-cp "$APP_DIR/Sources/NanoReminder/Assets/nano-face-cute-real.png" "$APP_BUNDLE/Contents/Resources/"
+cp -R "$BUILD_DIR/NanoReminder_NanoReminder.bundle" "$APP_BUNDLE/Contents/Resources/"
 if [[ -f /tmp/nano-icon.icns ]]; then
   cp /tmp/nano-icon.icns "$APP_BUNDLE/Contents/Resources/NanoReminder.icns"
 fi

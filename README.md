@@ -55,6 +55,8 @@ Claude should finish the task and call `notify_now`.
 
 ```bash
 bin/nano-reminder show --text "现在喝水"
+bin/nano-reminder show --text "**构建完成**，可以回来啦" --mood happy
+bin/nano-reminder show --text "马上回来处理这个失败" --shake --mood panic
 bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 bin/nano-reminder list
 bin/nano-reminder delete <id>
@@ -69,11 +71,11 @@ Data lives at:
 
 ## Roadmap
 
-- Adaptive bubble window sizing for different message lengths.
-- More avatar expressions to represent different agent states.
-- Markdown-style `**keywords**` rendered with colorful RGB emphasis.
+- [x] Adaptive bubble window sizing for different message lengths.
+- [x] More Nano avatar expressions to represent different agent states.
+- [x] Markdown-style `**keywords**` rendered with colorful RGB emphasis.
 - Optional choice prompts such as yes/no/custom answers, enabling an ask-style flow.
-- Optional window shake animation for moments when the agent is especially excited.
+- [x] Optional window shake animation for moments when the agent is especially excited.
 - A way to proactively open an input command window, backed by command-line calls to Claude Code CLI.
 
 ## License

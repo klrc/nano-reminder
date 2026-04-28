@@ -14,7 +14,8 @@ final class ReminderWindowManager {
 
     func present(task: TaskItem) {
         print("ReminderWindowManager present \(task.id) \(task.text)")
-        let windowSize = calculateWindowSize(text: task.text)
+        let visibleFrame = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
+        let metrics = ReminderLayout.metrics(for: task.text, visibleFrame: visibleFrame)
 
         let viewModel = AssistantViewModel()
         viewModel.onDismiss = { [weak self] _ in
@@ -23,12 +24,12 @@ final class ReminderWindowManager {
             self.dismiss(task: task)
         }
 
-        let rootView = AssistantRootView(viewModel: viewModel)
-        let hostingView = NSHostingView(rootView: rootView.frame(width: windowSize.width, height: windowSize.height))
+        let rootView = AssistantRootView(viewModel: viewModel, textWidth: metrics.textWidth)
+        let hostingView = NSHostingView(rootView: rootView.frame(width: metrics.windowSize.width, height: metrics.windowSize.height))
 
         let idx = windows.count
         let window = AssistantWindow(
-            contentRect: calculateWindowFrame(index: idx, size: windowSize),
+            contentRect: calculateWindowFrame(index: idx, size: metrics.windowSize),
             styleMask: [.borderless],
             backing: .buffered,
             defer: false
@@ -61,22 +62,6 @@ final class ReminderWindowManager {
         let x = visibleFrame.minX + gap
         let y = visibleFrame.minY + gap + CGFloat(index) * (size.height + gap)
         return NSRect(x: x, y: y, width: size.width, height: size.height)
-    }
-
-    private func calculateWindowSize(text: String) -> NSSize {
-        let width: CGFloat = 660
-        let minHeight: CGFloat = 128
-        let maxHeight = max(minHeight, (NSScreen.main?.visibleFrame.height ?? 900) - 80)
-        let textWidth: CGFloat = 510
-        let font = NSFont.systemFont(ofSize: 15, weight: .semibold)
-        let bounds = (text as NSString).boundingRect(
-            with: NSSize(width: textWidth, height: .greatestFiniteMagnitude),
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: [.font: font]
-        )
-        let chromeHeight: CGFloat = 92
-        let height = min(max(minHeight, ceil(bounds.height) + chromeHeight), maxHeight)
-        return NSSize(width: width, height: height)
     }
 
     private func repositionAllWindows() {

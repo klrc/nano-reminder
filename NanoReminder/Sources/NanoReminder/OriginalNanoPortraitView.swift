@@ -2,8 +2,14 @@ import AppKit
 import SwiftUI
 
 struct OriginalNanoPortraitView: View {
+    let mood: ReminderMood
+
+    init(mood: ReminderMood = .defaultMood) {
+        self.mood = mood
+    }
+
     var body: some View {
-        if let url = Bundle.module.url(forResource: "nano-face-cute-real", withExtension: "png"),
+        if let url = Bundle.module.url(forResource: mood.assetName, withExtension: "png"),
            let image = NSImage(contentsOf: url) {
             Image(nsImage: image)
                 .resizable()

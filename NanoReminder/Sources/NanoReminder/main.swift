@@ -15,8 +15,33 @@ func argumentValue(named name: String) -> String? {
     return args[index + 1]
 }
 
+func positionalMessage(from args: [String], droppingFirst: Bool = false) -> String? {
+    let values = droppingFirst ? Array(args.dropFirst()) : args
+    var messageParts: [String] = []
+    var i = 0
+
+    while i < values.count {
+        switch values[i] {
+        case "--text", "--message", "--mood":
+            i += 2
+        case "--shake", "--resident":
+            i += 1
+        default:
+            if !values[i].hasPrefix("--") {
+                messageParts.append(values[i])
+            }
+            i += 1
+        }
+    }
+
+    return messageParts.joined(separator: " ")
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+        .nilIfEmpty
+}
+
 let app = NSApplication.shared
 let args = Array(CommandLine.arguments.dropFirst())
+let shouldShakeInitialMessage = args.contains("--shake")
 
 // Run migration first
 DataMigrator.migrateIfNeeded()
@@ -42,7 +67,7 @@ if let first = args.first, ["add", "list", "delete", "clean"].contains(first) {
 let showText: String?
 if args.first == "show" {
     showText = argumentValue(named: "--text")
-        ?? Array(args.dropFirst()).filter { !$0.hasPrefix("--") }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+        ?? positionalMessage(from: args, droppingFirst: true)
     if showText == nil {
         CLIOutput.printError("用法: nano-reminder show --text <内容>")
         exit(1)
@@ -51,12 +76,25 @@ if args.first == "show" {
     showText = nil
 }
 
+let initialMessage = showText
+    ?? argumentValue(named: "--message")
+    ?? positionalMessage(from: args)
+
+let explicitMood: ReminderMood?
+if let moodValue = argumentValue(named: "--mood") {
+    guard let parsedMood = ReminderMood(rawValue: moodValue) else {
+        CLIOutput.printError("--mood 必须是: \(ReminderMood.usageList)")
+        exit(1)
+    }
+    explicitMood = parsedMood
+} else {
+    explicitMood = nil
+}
+
 // --resident or no args -> resident mode (default when launched as .app)
 let launchConfig = LaunchConfig(
     isResident: args.contains("--resident") || args.isEmpty,
-    initialMessage: showText
-        ?? argumentValue(named: "--message")
-        ?? args.filter { !$0.hasPrefix("--") }.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+    initialMessage: initialMessage.map { ReminderText.encode($0, shake: shouldShakeInitialMessage, mood: explicitMood) },
     quitsAfterInitialMessage: showText != nil
 )
 

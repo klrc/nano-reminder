@@ -24,6 +24,8 @@ swift run -- --resident
 
 ```bash
 bin/nano-reminder show --text "现在喝水"
+bin/nano-reminder show --text "**构建完成**，可以回来啦" --mood happy
+bin/nano-reminder show --text "马上回来处理这个失败" --shake --mood panic
 ```
 
 ### 添加定时提醒
@@ -37,6 +39,7 @@ bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 ```bash
 # 立刻弹出
 /Users/sh/Code/nano-reminder/bin/nano-reminder show --text "提醒内容"
+/Users/sh/Code/nano-reminder/bin/nano-reminder show --text "构建完成" --mood happy
 
 # 写入一个未来提醒；常驻进程到点弹出
 /Users/sh/Code/nano-reminder/bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "提醒内容"
@@ -63,6 +66,7 @@ bin/nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 
 ```bash
 nano-reminder show --text "现在喝水"
+nano-reminder show --text "**构建完成**，可以回来啦" --shake
 nano-reminder add --at "2026-04-28T18:00:00+08:00" --text "下班打卡"
 nano-reminder list
 nano-reminder delete <id>
